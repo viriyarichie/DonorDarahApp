@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+:root {
+  --pmi-red: #DC2626;
+  --pmi-red-dark: #991B1B;
+  --pmi-red-light: #FEE2E2;
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #F8FAFC;
+}
+
+.dark body {
+  background: #0F172A;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.pmi-gradient {
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+}
+
+.pmi-gradient-light {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Leaflet map container */
+.map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Blood type badge colors */
+.blood-A { background: #DBEAFE; color: #1D4ED8; }
+.blood-B { background: #D1FAE5; color: #065F46; }
+.blood-AB { background: #EDE9FE; color: #5B21B6; }
+.blood-O { background: #FEF3C7; color: #92400E; }
+
+/* Status colors */
+.status-menunggu { background: #FEF3C7; color: #92400E; }
+.status-dikonfirmasi { background: #DBEAFE; color: #1D4ED8; }
+.status-selesai { background: #D1FAE5; color: #065F46; }
+.status-dibatalkan { background: #FEE2E2; color: #991B1B; }
+
+/* Card hover effect */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
