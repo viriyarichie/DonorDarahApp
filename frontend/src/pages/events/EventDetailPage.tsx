@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, MapPin, Calendar, Users, User } from 'lucide-react';
-import eventService from '../../services/eventService';
-import { PageSkeleton } from '../../components/ui/LoadingSkeleton';
-import toast from 'react-hot-toast';
+import React, { useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, MapPin, Calendar, Users, User } from "lucide-react";
+import eventService from "../../services/eventService";
+import { PageSkeleton } from "../../components/ui/LoadingSkeleton";
+import toast from "react-hot-toast";
 
 export const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ export const EventDetailPage = () => {
   const mapInstanceRef = useRef<any>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['event', id],
+    queryKey: ["event", id],
     queryFn: () => eventService.getById(Number(id)),
     enabled: !!id,
   });
@@ -22,36 +22,41 @@ export const EventDetailPage = () => {
   const registerMutation = useMutation({
     mutationFn: () => eventService.register(Number(id)),
     onSuccess: () => {
-      toast.success('Pendaftaran event berhasil!');
-      qc.invalidateQueries({ queryKey: ['event', id] });
+      toast.success("Pendaftaran event berhasil!");
+      qc.invalidateQueries({ queryKey: ["event", id] });
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.errors?.event_id?.[0] || 'Gagal mendaftar.');
+      toast.error(
+        err.response?.data?.errors?.event_id?.[0] || "Gagal mendaftar.",
+      );
     },
   });
 
   const event = data?.data?.data;
 
   useEffect(() => {
-    if (!event?.location?.latitude || !mapRef.current || mapInstanceRef.current) return;
+    if (!event?.location?.latitude || !mapRef.current || mapInstanceRef.current)
+      return;
 
     const initMap = async () => {
-      const L = (await import('leaflet')).default;
+      const L = (await import("leaflet")).default;
 
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
       const map = L.map(mapRef.current!).setView(
         [event.location!.latitude!, event.location!.longitude!],
-        15
+        15,
       );
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
       }).addTo(map);
 
       L.marker([event.location!.latitude!, event.location!.longitude!])
@@ -73,7 +78,12 @@ export const EventDetailPage = () => {
   }, [event]);
 
   if (isLoading) return <PageSkeleton />;
-  if (!event) return <div className="text-center py-12 text-gray-500">Event tidak ditemukan.</div>;
+  if (!event)
+    return (
+      <div className="text-center py-12 text-gray-500">
+        Event tidak ditemukan.
+      </div>
+    );
 
   const isFull = event.registered_count >= event.quota;
 
@@ -94,7 +104,9 @@ export const EventDetailPage = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">{event.name}</h1>
-            <div className="text-sm text-gray-500 mt-1">{event.event_date_formatted}</div>
+            <div className="text-sm text-gray-500 mt-1">
+              {event.event_date_formatted}
+            </div>
           </div>
         </div>
 
@@ -104,27 +116,35 @@ export const EventDetailPage = () => {
               <Calendar size={13} />
               Tanggal
             </div>
-            <div className="text-sm font-semibold">{event.event_date_formatted}</div>
+            <div className="text-sm font-semibold text-black">
+              {event.event_date_formatted}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-xl p-3">
             <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
               <Users size={13} />
               Peserta
             </div>
-            <div className="text-sm font-semibold">{event.registered_count}/{event.quota}</div>
+            <div className="text-sm font-semibold text-black">
+              {event.registered_count}/{event.quota}
+            </div>
           </div>
           <div className="bg-gray-50 rounded-xl p-3">
             <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
               <User size={13} />
               Penyelenggara
             </div>
-            <div className="text-sm font-semibold">{event.creator?.name || 'PMI'}</div>
+            <div className="text-sm font-semibold text-black">
+              {event.creator?.name || "PMI"}
+            </div>
           </div>
         </div>
 
         <div className="mb-5">
           <h3 className="font-semibold text-gray-900 mb-2">Deskripsi</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{event.description}</p>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {event.description}
+          </p>
         </div>
 
         <div className="mb-5">
@@ -133,7 +153,9 @@ export const EventDetailPage = () => {
             <MapPin size={15} className="text-red-500 mt-0.5" />
             <div>
               <div className="text-sm font-medium">{event.location?.name}</div>
-              <div className="text-xs text-gray-500">{event.location?.address}</div>
+              <div className="text-xs text-gray-500">
+                {event.location?.address}
+              </div>
             </div>
           </div>
           {event.location?.latitude && (
@@ -144,11 +166,15 @@ export const EventDetailPage = () => {
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 bg-gray-100 rounded-full h-2">
             <div
-              className={`h-2 rounded-full transition-all ${isFull ? 'bg-red-500' : 'pmi-gradient'}`}
-              style={{ width: `${Math.min((event.registered_count / event.quota) * 100, 100)}%` }}
+              className={`h-2 rounded-full transition-all ${isFull ? "bg-red-500" : "pmi-gradient"}`}
+              style={{
+                width: `${Math.min((event.registered_count / event.quota) * 100, 100)}%`,
+              }}
             />
           </div>
-          <span className="text-xs text-gray-500 whitespace-nowrap">{event.registered_count}/{event.quota} terdaftar</span>
+          <span className="text-xs text-gray-500 whitespace-nowrap">
+            {event.registered_count}/{event.quota} terdaftar
+          </span>
         </div>
 
         <button
@@ -156,7 +182,11 @@ export const EventDetailPage = () => {
           disabled={isFull || registerMutation.isPending}
           className="w-full py-3 pmi-gradient text-white rounded-xl font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity"
         >
-          {isFull ? 'Kuota Penuh' : registerMutation.isPending ? 'Mendaftar...' : 'Daftar Event Ini'}
+          {isFull
+            ? "Kuota Penuh"
+            : registerMutation.isPending
+              ? "Mendaftar..."
+              : "Daftar Event Ini"}
         </button>
       </div>
     </div>
