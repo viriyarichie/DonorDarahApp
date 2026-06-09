@@ -42,6 +42,8 @@ export const AppRouter = () => (
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registrasi" element={<RegisterPage />} />
+          <Route path="/edukasi/:id" element={<LoginPage />} />
+
         </Route>
 
         {/* Protected routes */}
