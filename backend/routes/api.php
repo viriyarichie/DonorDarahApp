@@ -65,6 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Events - register
         Route::post('/events/{event}/register', [EventController::class, 'register']);
+        Route::get('/my-event-registrations', [EventController::class, 'myRegistrations']);
     });
 
     // ---- PETUGAS & ADMIN ----
@@ -80,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Event management
         Route::post('/events', [EventController::class, 'store']);
         Route::put('/events/{event}', [EventController::class, 'update']);
+        Route::get('/events/{event}/participants', [EventController::class, 'participants']);
 
         // Condition management
         Route::post('/donors/{donor}/condition', [ConditionController::class, 'store']);

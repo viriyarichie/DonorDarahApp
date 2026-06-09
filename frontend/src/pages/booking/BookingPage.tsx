@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
   Calendar,
-  MapPin,
-  CheckCircle,
   Clock,
   XCircle,
   Plus,
+  MapPin,
+  Tag,
 } from "lucide-react";
 import bookingService from "../../services/bookingService";
 import locationService from "../../services/locationService";
+import eventService from "../../services/eventService";
+import { useAuthStore } from "../../stores/authStore";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import { PageSkeleton } from "../../components/ui/LoadingSkeleton";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
@@ -27,6 +30,9 @@ export const BookingPage = () => {
     notes: "",
   });
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const uid = user?.id;
 
   const { data: locData } = useQuery({
     queryKey: ["locations"],
@@ -34,8 +40,14 @@ export const BookingPage = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["bookings", page],
+    queryKey: ["bookings", uid, page],
     queryFn: () => bookingService.getAll({ page }),
+  });
+
+  // Ambil pendaftaran event milik user ini
+  const { data: eventRegData } = useQuery({
+    queryKey: ["my-event-registrations", uid],
+    queryFn: () => eventService.getMyRegistrations(),
   });
 
   const createMutation = useMutation({
@@ -74,10 +86,13 @@ export const BookingPage = () => {
   const bookings = data?.data?.data || [];
   const meta = data?.data?.meta;
   const locations = locData?.data?.data || [];
+  const eventRegistrations: any[] = eventRegData?.data?.data || [];
 
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const minDateStr = minDate.toISOString().split("T")[0];
+
+  const hasAnySchedule = bookings.length > 0 || eventRegistrations.length > 0;
 
   if (isLoading) return <PageSkeleton />;
 
@@ -176,23 +191,12 @@ export const BookingPage = () => {
         </div>
       )}
 
-      {/* Bookings List */}
-      {bookings.length === 0 ? (
-        <EmptyState
-          icon={Calendar}
-          title="Belum ada booking"
-          description="Anda belum memiliki jadwal donor. Buat jadwal donor pertama Anda!"
-          action={
-            <button
-              onClick={() => setShowForm(true)}
-              className="px-4 py-2.5 pmi-gradient text-white rounded-xl text-sm font-medium"
-            >
-              Buat Booking Sekarang
-            </button>
-          }
-        />
-      ) : (
+      {/* Jadwal Booking Reguler */}
+      {bookings.length > 0 && (
         <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
+            Booking Donor
+          </h2>
           {bookings.map((booking) => (
             <div
               key={booking.id}
@@ -240,6 +244,77 @@ export const BookingPage = () => {
             />
           )}
         </div>
+      )}
+
+      {/* Jadwal Event Donor */}
+      {eventRegistrations.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider px-1">
+            Event Donor Terdaftar
+          </h2>
+          {eventRegistrations.map((reg: any) => (
+            <div
+              key={reg.id}
+              className="bg-white rounded-2xl p-5 shadow-sm border border-blue-100 card-hover"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <MapPin className="text-blue-600" size={20} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <div className="text-sm font-semibold text-gray-800">
+                      {reg.event?.name}
+                    </div>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      <Tag size={10} />
+                      Event Donor
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {reg.event?.location?.name} — {reg.event?.location?.address}
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Clock size={13} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">
+                      {reg.event?.event_date_formatted}
+                    </span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      reg.status === 'hadir'   ? 'bg-green-100 text-green-700' :
+                      reg.status === 'batal'   ? 'bg-red-100 text-red-600' :
+                                                 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {reg.status === 'terdaftar' ? 'Terdaftar' : reg.status === 'hadir' ? 'Hadir' : 'Batal'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate(`/events/${reg.event?.id}`)}
+                  className="text-xs text-blue-600 hover:underline flex-shrink-0"
+                >
+                  Detail
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!hasAnySchedule && (
+        <EmptyState
+          icon={Calendar}
+          title="Belum ada jadwal donor"
+          description="Anda belum memiliki jadwal donor. Buat booking langsung atau daftar ke event donor PMI!"
+          action={
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-4 py-2.5 pmi-gradient text-white rounded-xl text-sm font-medium"
+            >
+              Buat Booking Sekarang
+            </button>
+          }
+        />
       )}
 
       <ConfirmDialog

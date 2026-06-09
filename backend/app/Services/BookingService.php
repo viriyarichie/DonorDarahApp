@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\Donor;
 use App\Models\Notification;
+use App\Models\Stock;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -43,18 +44,18 @@ class BookingService
         }
 
         $booking = Booking::create([
-            'user_id' => $user->id,
+            'user_id'     => $user->id,
             'location_id' => $data['location_id'],
             'booking_date' => $data['booking_date'],
-            'status' => 'menunggu',
-            'notes' => $data['notes'] ?? null,
+            'status'      => 'menunggu',
+            'notes'       => $data['notes'] ?? null,
         ]);
 
         // Kirim notifikasi
         Notification::create([
-            'title' => 'Booking Donor Berhasil',
+            'title'   => 'Booking Donor Berhasil',
             'message' => 'Booking donor Anda pada tanggal ' . Carbon::parse($data['booking_date'])->format('d/m/Y') . ' telah berhasil dibuat.',
-            'type' => 'umum',
+            'type'    => 'umum',
             'user_id' => $user->id,
         ]);
 
@@ -66,9 +67,9 @@ class BookingService
         $booking->update(['status' => 'dikonfirmasi']);
 
         Notification::create([
-            'title' => 'Booking Dikonfirmasi',
+            'title'   => 'Booking Dikonfirmasi',
             'message' => 'Booking donor Anda telah dikonfirmasi oleh petugas PMI.',
-            'type' => 'umum',
+            'type'    => 'umum',
             'user_id' => $booking->user_id,
         ]);
 
@@ -77,16 +78,36 @@ class BookingService
 
     public function completeBooking(Booking $booking): Booking
     {
+        // Buat record donor
         $donor = Donor::create([
-            'donation_date' => $booking->booking_date,
-            'donation_status' => 'berhasil',
-            'user_id' => $booking->user_id,
+            'donation_date'    => $booking->booking_date,
+            'donation_status'  => 'berhasil',
+            'user_id'          => $booking->user_id,
         ]);
 
         $booking->update([
-            'status' => 'selesai',
+            'status'   => 'selesai',
             'donor_id' => $donor->id,
         ]);
+
+        // Tambah stok darah di lokasi booking berdasarkan golongan darah pendonor
+        $user = $booking->user;
+        if ($user && $user->blood_type) {
+            $stock = Stock::where('location_id', $booking->location_id)
+                ->where('blood_type', $user->blood_type)
+                ->first();
+
+            if ($stock) {
+                $stock->increment('amount', 1);
+            } else {
+                // Buat entri stok baru jika belum ada untuk golongan darah ini di lokasi ini
+                Stock::create([
+                    'blood_type'  => $user->blood_type,
+                    'amount'      => 1,
+                    'location_id' => $booking->location_id,
+                ]);
+            }
+        }
 
         // Cek milestone penghargaan
         $donorCount = $booking->user->getDonorCount();
@@ -94,17 +115,17 @@ class BookingService
 
         if (in_array($donorCount, $milestones)) {
             Notification::create([
-                'title' => 'Selamat! Milestone Tercapai',
+                'title'   => 'Selamat! Milestone Tercapai',
                 'message' => "Anda telah mencapai {$donorCount} kali donor! Ajukan sertifikat penghargaan Anda.",
-                'type' => 'penghargaan',
+                'type'    => 'penghargaan',
                 'user_id' => $booking->user_id,
             ]);
         }
 
         Notification::create([
-            'title' => 'Donor Selesai',
+            'title'   => 'Donor Selesai',
             'message' => 'Terima kasih telah mendonorkan darah. Semoga kebaikan Anda bermanfaat bagi banyak orang.',
-            'type' => 'umum',
+            'type'    => 'umum',
             'user_id' => $booking->user_id,
         ]);
 
@@ -116,9 +137,9 @@ class BookingService
         $booking->update(['status' => 'dibatalkan']);
 
         Notification::create([
-            'title' => 'Booking Dibatalkan',
+            'title'   => 'Booking Dibatalkan',
             'message' => 'Booking donor Anda telah dibatalkan.',
-            'type' => 'umum',
+            'type'    => 'umum',
             'user_id' => $booking->user_id,
         ]);
 

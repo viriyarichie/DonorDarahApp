@@ -24,6 +24,13 @@ class EventService
 
     public function registerForEvent(User $user, Event $event): EventRegister
     {
+        // Hanya pendonor yang bisa mendaftar ke event
+        if (!$user->isPendonor()) {
+            throw ValidationException::withMessages([
+                'event_id' => ['Hanya pendonor yang dapat mendaftar ke event donor.'],
+            ]);
+        }
+
         // Cek apakah sudah terdaftar
         $existing = EventRegister::where('user_id', $user->id)
             ->where('event_id', $event->id)
@@ -57,6 +64,11 @@ class EventService
         ]);
 
         return $register->load(['user', 'event']);
+    }
+
+    public function getEventParticipants(Event $event)
+    {
+        return $event->eventRegisters()->with('user')->orderBy('registered_at')->get();
     }
 
     public function createEvent(array $data, User $creator): Event

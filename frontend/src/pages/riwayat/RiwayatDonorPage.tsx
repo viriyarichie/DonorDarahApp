@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Clock, Heart, Calendar, CheckCircle } from 'lucide-react';
 import donorService from '../../services/donorService';
+import { useAuthStore } from '../../stores/authStore';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { PageSkeleton } from '../../components/ui/LoadingSkeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -10,14 +11,16 @@ import { StatsCard } from '../../components/ui/StatsCard';
 
 export const RiwayatDonorPage = () => {
   const [page, setPage] = useState(1);
+  const { user } = useAuthStore();
+  const uid = user?.id;
 
   const { data: statsData } = useQuery({
-    queryKey: ['donor-stats'],
+    queryKey: ['donor-stats', uid],
     queryFn: () => donorService.getStats(),
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['donors-riwayat', page],
+    queryKey: ['donors-riwayat', uid, page],
     queryFn: () => donorService.getAll({ page }),
   });
 

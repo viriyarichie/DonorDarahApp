@@ -162,7 +162,7 @@
         <div class="recipient-name">{{ $user->name }}</div>
         <div class="milestone-text">
             Atas dedikasi dan keikhlasan dalam mendonorkan darah sebanyak
-            <strong>{{ $certificate->milestone }} ({{ $this->terbilang($certificate->milestone) }})</strong> kali
+            <strong>{{ $certificate->milestone }} Kali</strong>
             sebagai wujud kepedulian terhadap sesama manusia.
         </div>
         <div style="font-size: 9pt; color: #333; margin-bottom: 16px;">

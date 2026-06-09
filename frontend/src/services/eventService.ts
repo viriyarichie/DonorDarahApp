@@ -11,6 +11,8 @@ const eventService = {
     api.put<{ data: Event; message: string }>(`/events/${id}`, data),
   delete: (id: number) => api.delete(`/events/${id}`),
   register: (id: number) => api.post(`/events/${id}/register`),
+  getParticipants: (id: number) => api.get(`/events/${id}/participants`),
+  getMyRegistrations: () => api.get('/my-event-registrations'),
 };
 
 export default eventService;
