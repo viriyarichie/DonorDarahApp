@@ -12,6 +12,7 @@ use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -19,77 +20,148 @@ class DashboardController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $period = $request->query('period', '1m');
         $user = $request->user();
 
         if ($user->isAdmin() || $user->isPetugas()) {
-            return $this->adminDashboard();
+            return $this->adminDashboard($period);
         }
 
-        return $this->pendonorDashboard($user);
+        return $this->pendonorDashboard($user, $period);
     }
 
-    private function adminDashboard(): JsonResponse
+    private function getDonorActivity(string $period): array
     {
-        $totalDonors = Donor::where('donation_status', 'berhasil')->count();
-        $totalUsers = User::where('role', 'pendonor')->count();
-        $totalBookings = Booking::whereIn('status', ['menunggu', 'dikonfirmasi'])->count();
-        $stockSummary = $this->stockService->getSummary();
+        // Parse period
+        if (str_starts_with($period, 'year:')) {
+            $year = (int) substr($period, 5);
+            return $this->getByYear($year);
+        }
+
+        return match ($period) {
+            '1m'  => $this->getLast30Days(),
+            '6m'  => $this->getLastNMonths(6),
+            '1y'  => $this->getLastNMonths(12),
+            default => $this->getLast30Days(),
+        };
+    }
+
+    private function getLast30Days(): array
+    {
+        $rows = DB::table('donors')
+            ->select(DB::raw("DATE(donation_date) as date, COUNT(*) as count"))
+            ->where('donation_status', 'berhasil')
+            ->where('donation_date', '>=', Carbon::now()->subDays(29)->startOfDay())
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $result = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i)->toDateString();
+            $result[] = [
+                'label' => Carbon::parse($date)->format('d/m'),
+                'count' => $rows[$date]->count ?? 0,
+            ];
+        }
+        return $result;
+    }
+
+    private function getLastNMonths(int $n): array
+    {
+        $rows = DB::table('donors')
+            ->select(DB::raw("DATE_FORMAT(donation_date, '%Y-%m') as month, COUNT(*) as count"))
+            ->where('donation_status', 'berhasil')
+            ->where('donation_date', '>=', Carbon::now()->subMonths($n - 1)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $result = [];
+        for ($i = $n - 1; $i >= 0; $i--) {
+            $key = Carbon::now()->subMonths($i)->format('Y-m');
+            $result[] = [
+                'label' => Carbon::parse($key . '-01')->translatedFormat('M Y'),
+                'count' => $rows[$key]->count ?? 0,
+            ];
+        }
+        return $result;
+    }
+
+    private function getByYear(int $year): array
+    {
+        $rows = DB::table('donors')
+            ->select(DB::raw("MONTH(donation_date) as month_num, COUNT(*) as count"))
+            ->where('donation_status', 'berhasil')
+            ->whereYear('donation_date', $year)
+            ->groupBy('month_num')
+            ->orderBy('month_num')
+            ->get()
+            ->keyBy('month_num');
+
+        $result = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $result[] = [
+                'label' => Carbon::createFromDate($year, $m, 1)->translatedFormat('M'),
+                'count' => $rows[$m]->count ?? 0,
+            ];
+        }
+        return $result;
+    }
+
+    private function adminDashboard(string $period = '1m'): JsonResponse
+    {
+        $totalDonors    = Donor::where('donation_status', 'berhasil')->count();
+        $totalUsers     = User::where('role', 'pendonor')->count();
+        $totalBookings  = Booking::whereIn('status', ['menunggu', 'dikonfirmasi'])->count();
+        $stockSummary   = $this->stockService->getSummary();
 
         $recentDonors = Donor::with('user')
             ->where('donation_status', 'berhasil')
             ->orderByDesc('donation_date')
             ->limit(5)
             ->get()
-            ->map(fn ($d) => [
-                'name' => $d->user->name,
+            ->map(fn($d) => [
+                'name'       => $d->user->name,
                 'blood_type' => $d->user->blood_type,
-                'date' => $d->donation_date->format('d/m/Y'),
+                'date'       => $d->donation_date->format('d/m/Y'),
             ]);
 
         $upcomingEvents = Event::with('location')
             ->upcoming()
             ->limit(3)
             ->get()
-            ->map(fn ($e) => [
-                'id' => $e->id,
-                'name' => $e->name,
-                'date' => $e->event_date->format('d/m/Y H:i'),
+            ->map(fn($e) => [
+                'id'       => $e->id,
+                'name'     => $e->name,
+                'date'     => $e->event_date->format('d/m/Y H:i'),
                 'location' => $e->location->name,
             ]);
 
-        // Aktivitas donor per bulan (6 bulan terakhir)
-        $donorActivity = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = Carbon::now()->subMonths($i);
-            $count = Donor::where('donation_status', 'berhasil')
-                ->whereYear('donation_date', $month->year)
-                ->whereMonth('donation_date', $month->month)
-                ->count();
-            $donorActivity[] = [
-                'month' => $month->format('M Y'),
-                'count' => $count,
-            ];
-        }
+        // ← use shared helper instead of hardcoded loop
+        $donorActivity = $this->getDonorActivity($period);
 
         return response()->json([
             'data' => [
                 'stats' => [
-                    'total_donors' => $totalDonors,
-                    'total_users' => $totalUsers,
+                    'total_donors'   => $totalDonors,
+                    'total_users'    => $totalUsers,
                     'total_bookings' => $totalBookings,
                 ],
-                'stock_summary' => $stockSummary,
-                'recent_donors' => $recentDonors,
+                'stock_summary'  => $stockSummary,
+                'recent_donors'  => $recentDonors,
                 'upcoming_events' => $upcomingEvents,
                 'donor_activity' => $donorActivity,
             ],
         ]);
     }
 
-    private function pendonorDashboard(User $user): JsonResponse
+    private function pendonorDashboard(User $user, string $period = '1m'): JsonResponse
     {
-        $totalDonor = $user->getDonorCount();
-        $lastDonor = $user->donors()->where('donation_status', 'berhasil')->latest('donation_date')->first();
+        $totalDonor  = $user->getDonorCount();
+        $lastDonor   = $user->donors()->where('donation_status', 'berhasil')->latest('donation_date')->first();
         $nextEligible = $lastDonor ? Carbon::parse($lastDonor->donation_date)->addMonths(3) : null;
 
         $activeBooking = $user->bookings()
@@ -98,20 +170,19 @@ class DashboardController extends Controller
             ->latest()
             ->first();
 
-        $stockSummary = $this->stockService->getSummary();
-
+        $stockSummary   = $this->stockService->getSummary();
         $upcomingEvents = Event::with('location')
             ->upcoming()
             ->limit(3)
             ->get()
-            ->map(fn ($e) => [
-                'id' => $e->id,
-                'name' => $e->name,
-                'date' => $e->event_date->format('d/m/Y H:i'),
+            ->map(fn($e) => [
+                'id'       => $e->id,
+                'name'     => $e->name,
+                'date'     => $e->event_date->format('d/m/Y H:i'),
                 'location' => $e->location->name,
             ]);
 
-        $milestones = [10, 25, 50, 75, 100];
+        $milestones    = [10, 25, 50, 75, 100];
         $nextMilestone = null;
         foreach ($milestones as $m) {
             if ($totalDonor < $m) {
@@ -120,21 +191,25 @@ class DashboardController extends Controller
             }
         }
 
+        // ← also filtered
+        $donorActivity = $this->getDonorActivity($period);
+
         return response()->json([
             'data' => [
-                'total_donor' => $totalDonor,
+                'total_donor'        => $totalDonor,
                 'last_donation_date' => $lastDonor?->donation_date,
                 'next_eligible_date' => $nextEligible,
-                'next_milestone' => $nextMilestone,
-                'progress_to_next' => $nextMilestone ? round(($totalDonor / $nextMilestone) * 100, 1) : 100,
-                'active_booking' => $activeBooking ? [
-                    'id' => $activeBooking->id,
-                    'date' => $activeBooking->booking_date->format('d/m/Y'),
+                'next_milestone'     => $nextMilestone,
+                'progress_to_next'   => $nextMilestone ? round(($totalDonor / $nextMilestone) * 100, 1) : 100,
+                'active_booking'     => $activeBooking ? [
+                    'id'       => $activeBooking->id,
+                    'date'     => $activeBooking->booking_date->format('d/m/Y'),
                     'location' => $activeBooking->location->name,
-                    'status' => $activeBooking->status,
+                    'status'   => $activeBooking->status,
                 ] : null,
-                'stock_summary' => $stockSummary,
+                'stock_summary'  => $stockSummary,
                 'upcoming_events' => $upcomingEvents,
+                'donor_activity' => $donorActivity,  // ← added
             ],
         ]);
     }

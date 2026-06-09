@@ -5,8 +5,8 @@ export interface User {
   email: string;
   phone?: string;
   birth_date?: string;
-  blood_type?: 'A' | 'B' | 'AB' | 'O';
-  role: 'pendonor' | 'petugas' | 'admin';
+  blood_type?: "A" | "B" | "AB" | "O";
+  role: "pendonor" | "petugas" | "admin";
   total_donor?: number;
   created_at?: string;
 }
@@ -14,7 +14,7 @@ export interface User {
 export interface Location {
   id: number;
   name: string;
-  type: 'unit_tetap' | 'unit_mobile' | 'rumah_sakit';
+  type: "unit_tetap" | "unit_mobile" | "rumah_sakit";
   type_label: string;
   address: string;
   latitude?: number;
@@ -23,7 +23,7 @@ export interface Location {
 
 export interface Stock {
   id: number;
-  blood_type: 'A' | 'B' | 'AB' | 'O';
+  blood_type: "A" | "B" | "AB" | "O";
   amount: number;
   status: string;
   status_color: string;
@@ -39,7 +39,7 @@ export interface Stock {
 export interface StockSummary {
   [key: string]: {
     total: number;
-    status: 'aman' | 'perlu_perhatian' | 'kritis';
+    status: "aman" | "perlu_perhatian" | "kritis";
   };
 }
 
@@ -47,7 +47,7 @@ export interface Booking {
   id: number;
   booking_date: string;
   booking_date_formatted?: string;
-  status: 'menunggu' | 'dikonfirmasi' | 'selesai' | 'dibatalkan';
+  status: "menunggu" | "dikonfirmasi" | "selesai" | "dibatalkan";
   notes?: string;
   user?: User;
   location?: {
@@ -64,7 +64,7 @@ export interface Donor {
   id: number;
   donation_date: string;
   donation_date_formatted?: string;
-  donation_status: 'berhasil' | 'gagal' | 'ditunda';
+  donation_status: "berhasil" | "gagal" | "ditunda";
   user?: User;
   condition?: Condition;
   created_at?: string;
@@ -74,7 +74,7 @@ export interface Condition {
   id: number;
   hemoglobin: number;
   blood_pressure: string;
-  eligibility_status: 'layak' | 'tidak_layak' | 'ditunda';
+  eligibility_status: "layak" | "tidak_layak" | "ditunda";
   eligibility_label?: string;
   notes?: string;
   created_at?: string;
@@ -113,7 +113,7 @@ export interface Article {
 export interface Certificate {
   id: number;
   milestone: number;
-  status: 'pending' | 'disetujui' | 'ditolak';
+  status: "pending" | "disetujui" | "ditolak";
   issue_date?: string;
   file_url?: string;
   can_download: boolean;
@@ -125,7 +125,7 @@ export interface Notification {
   id: number;
   title: string;
   message: string;
-  type: 'reminder' | 'penghargaan' | 'event' | 'umum';
+  type: "reminder" | "penghargaan" | "event" | "umum";
   is_read: boolean;
   created_at?: string;
   created_at_diff?: string;
@@ -177,7 +177,7 @@ export interface DashboardData {
     date: string;
   }>;
   donor_activity?: Array<{
-    month: string;
+    label: string;
     count: number;
   }>;
 }
