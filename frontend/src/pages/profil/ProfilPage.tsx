@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { User, Phone, Calendar, Lock, Save, Droplets, CreditCard, Mail } from 'lucide-react';
+import { User, Phone, Calendar, Lock, Save, Droplets, CreditCard, Mail, Award } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import authService from '../../services/authService';
 import { BloodTypeBadge } from '../../components/ui/BloodTypeBadge';
 import toast from 'react-hot-toast';
+import { Navigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export const ProfilPage = () => {
+  const navigate = useNavigate();
   const { user, setUser } = useAuthStore();
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -76,6 +79,15 @@ export const ProfilPage = () => {
             </div>
           </div>
         </div>
+        <br></br>
+        <button
+          onClick={() => navigate('/penghargaan')}
+          disabled={updateMutation.isPending || !form.name}
+          className="w-full flex items-center justify-center gap-2 py-3 pmi-gradient text-white rounded-xl font-semibold text-sm hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-red-200"
+        >
+          <Award size={16} />
+          {'Penghargaan'}
+        </button>
       </div>
 
       {/* Edit Form */}

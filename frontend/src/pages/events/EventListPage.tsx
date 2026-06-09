@@ -142,7 +142,7 @@ export const EventListPage = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => navigate(`/events/${event.id}`)}
+                      onClick={() => navigate(`/eventparticipants/${event.id}`)}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-medium hover:bg-blue-100 transition-colors"
                     >
                       <Users size={12} />

@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
     label: "Penghargaan",
     path: "/penghargaan",
     icon: Award,
-    roles: ["pendonor", "petugas", "admin"],
+    roles: ["petugas", "admin"],
   },
   // { label: 'Notifikasi', path: '/notifikasi', icon: Bell, roles: ['pendonor', 'petugas', 'admin'] },
   {

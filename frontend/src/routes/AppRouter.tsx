@@ -5,6 +5,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AuthGuard } from '../components/guards/AuthGuard';
 import { RoleGuard } from '../components/guards/RoleGuard';
 import { PageSkeleton } from '../components/ui/LoadingSkeleton';
+import { DaftarPesertaPage } from '../pages/events/DaftarPesertaPage';
 
 // Auth pages
 const LoginPage = lazy(() => import('../pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -50,6 +51,7 @@ export const AppRouter = () => (
             <Route path="/stok-darah" element={<StokDarahPage />} />
             <Route path="/events" element={<EventListPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/eventparticipants/:id" element={<DaftarPesertaPage />} />
             <Route path="/notifikasi" element={<NotifikasiPage />} />
             <Route path="/edukasi" element={<EdukasiPage />} />
             <Route path="/edukasi/:id" element={<ArtikelDetailPage />} />

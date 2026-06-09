@@ -206,15 +206,15 @@ export const EventDetailPage = () => {
         )}
 
         {/* Petugas/Admin: info peran */}
-        {!isPendonor && (
+        {/* {!isPendonor && (
           <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700">
             Anda dapat memantau daftar peserta di bawah ini. Hanya pendonor yang dapat mendaftar ke event.
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Daftar Peserta – hanya untuk petugas/admin */}
-      {!isPendonor && (
+      {/* {!isPendonor && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-bold text-gray-900">
@@ -281,8 +281,8 @@ export const EventDetailPage = () => {
               </table>
             </div>
           )}
-        </div>
-      )}
+        </div> */}
+      {/* )} */}
     </div>
   );
 };

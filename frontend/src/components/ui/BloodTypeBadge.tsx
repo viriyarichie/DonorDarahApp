@@ -1,7 +1,7 @@
 interface BloodTypeBadgeProps {
   type: string;
   size?: 'sm' | 'md' | 'lg';
-}
+}       
 
 const colors: Record<string, string> = {
   A: 'bg-blue-100 text-blue-700 border-blue-200',

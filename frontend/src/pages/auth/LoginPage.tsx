@@ -39,20 +39,20 @@ export const LoginPage = () => {
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-3xl font-bold text-white-900 mb-2">
           Selamat Datang!
         </h2>
-        <p className="text-gray-500">Masuk ke akun PMI Donor Anda</p>
+        <p className="text-white-500">Masuk ke akun PMI Donor Anda</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-white-700 mb-1.5">
             Email
           </label>
           <div className="relative">
             <Mail
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white-400"
               size={18}
             />
             <input
@@ -61,7 +61,7 @@ export const LoginPage = () => {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="contoh@email.com"
-              className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-colors outline-none text-black ${
+              className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-colors outline-none text-white ${
                 errors.email
                   ? "border-red-400 bg-red-50"
                   : "border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
@@ -75,12 +75,12 @@ export const LoginPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-white-700 mb-1.5">
             Kata Sandi
           </label>
           <div className="relative">
             <Lock
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white-400"
               size={18}
             />
             <input
@@ -89,7 +89,7 @@ export const LoginPage = () => {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Minimal 8 karakter"
-              className={`w-full pl-11 pr-12 py-3 rounded-xl border text-sm transition-colors outline-none text-black ${
+              className={`w-full pl-11 pr-12 py-3 rounded-xl border text-sm transition-colors outline-none text-white ${
                 errors.password
                   ? "border-red-400 bg-red-50"
                   : "border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
@@ -110,16 +110,16 @@ export const LoginPage = () => {
         </div>
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-white-600 cursor-pointer">
             <input
               type="checkbox"
-              className="w-4 h-4 rounded border-gray-300 text-red-600"
+              className="w-4 h-4 rounded border-white-300 text-red-600"
             />
             Ingat saya
           </label>
           <Link
             to="/lupa-sandi"
-            className="text-sm text-red-600 hover:text-red-700 font-medium"
+            className="text-sm text-blue-600 hover:text-gray-600 font-medium"
           >
             Lupa kata sandi?
           </Link>
@@ -142,11 +142,11 @@ export const LoginPage = () => {
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500 mt-6">
+      <p className="text-center text-sm text-white-500 mt-6">
         Belum punya akun?{" "}
         <Link
           to="/registrasi"
-          className="text-red-600 font-semibold hover:text-red-700"
+          className="text-blue-600 font-semibold hover:text-gray-700"
         >
           Daftar sekarang
         </Link>
