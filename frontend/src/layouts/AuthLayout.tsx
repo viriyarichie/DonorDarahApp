@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { Outlet, Navigate, useParams } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
-import { Droplets } from 'lucide-react';
+import { Outlet, Navigate, useParams } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
+import { Droplets } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Search, Calendar, ChevronRight, ArrowLeft, User } from "lucide-react";
+import {
+  BookOpen,
+  Search,
+  Calendar,
+  ChevronRight,
+  ArrowLeft,
+  User,
+} from "lucide-react";
 import articleService from "../services/articleService";
 import { PageSkeleton } from "../components/ui/LoadingSkeleton";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -50,7 +57,7 @@ export const AuthLayout = () => {
             <BookOpen className="text-gray-300 mx-auto mb-3" size={48} />
             <p className="text-gray-500">Artikel tidak ditemukan.</p>
             <button
-              onClick={() => navigate('/edukasi')}
+              onClick={() => navigate("/edukasi")}
               className="mt-4 text-red-600 text-sm font-medium hover:text-red-700"
             >
               ← Kembali ke Edukasi
@@ -89,7 +96,7 @@ export const AuthLayout = () => {
             <div className="flex items-center gap-4 text-xs text-gray-400 mb-6 pb-6 border-b border-gray-100">
               <div className="flex items-center gap-1.5">
                 <User size={13} />
-                {article.author?.name || 'PMI'}
+                {article.author?.name || "PMI"}
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar size={13} />
@@ -120,7 +127,9 @@ export const AuthLayout = () => {
     return (
       <div className="p-6 overflow-y-auto">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edukasi Donor Darah</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Edukasi Donor Darah
+          </h1>
           <p className="text-sm text-gray-500 mt-1">
             Artikel dan informasi seputar donor darah
           </p>
@@ -144,7 +153,10 @@ export const AuthLayout = () => {
             />
           </div>
           <button
-            onClick={() => { setSearch(searchInput); setPage(1); }}
+            onClick={() => {
+              setSearch(searchInput);
+              setPage(1);
+            }}
             className="px-4 py-2.5 pmi-gradient text-white rounded-xl text-sm font-medium"
           >
             Cari
@@ -204,14 +216,16 @@ export const AuthLayout = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left */}
-      <div className="w-1/2 overflow-y-auto bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left - hidden on mobile when viewing article detail */}
+      <div
+        className={`${artikelId ? "hidden md:block" : "block"} w-full md:w-1/2 overflow-y-auto bg-gray-50`}
+      >
         {renderLeftPanel()}
       </div>
 
       {/* Right - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 pmi-gradient relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center p-6 pmi-gradient relative overflow-hidden min-h-[60vh] md:min-h-screen">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
         <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-white/5 rounded-full" />
@@ -222,7 +236,7 @@ export const AuthLayout = () => {
             </div>
             <div>
               <div className="font-bold text-gray-900">PMI Donor</div>
-              <div className="text-xs text-gray-500">Sistem Donor Darah</div>
+              <div className="text-xs text-white-500">Sistem Donor Darah</div>
             </div>
           </div>
           <Outlet />

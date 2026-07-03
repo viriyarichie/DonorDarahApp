@@ -134,7 +134,7 @@ export const KelolaStokPage = () => {
                 onChange={(e) =>
                   setForm({ ...form, blood_type: e.target.value })
                 }
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400 text-black"
               >
                 <option value="">Pilih golongan</option>
                 {["A", "B", "AB", "O"].map((t) => (
@@ -154,7 +154,7 @@ export const KelolaStokPage = () => {
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 placeholder="0"
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400 text-black"
               />
             </div>
             <div>
@@ -166,7 +166,7 @@ export const KelolaStokPage = () => {
                 onChange={(e) =>
                   setForm({ ...form, location_id: e.target.value })
                 }
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-red-400 text-black"
               >
                 <option value="">Pilih lokasi</option>
                 {locations.map((loc) => (

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -355,38 +355,114 @@ export const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Active Booking (pendonor) / Recent Donors (admin) */}
-        {!isAdminOrPetugas && dashData?.active_booking ? (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-4">Booking Aktif</h3>
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="text-blue-600" size={18} />
-                <span className="text-sm font-semibold text-blue-800">
-                  Jadwal Donor
-                </span>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Tanggal</span>
-                  <span className="font-medium">
-                    {dashData.active_booking.date}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Lokasi</span>
-                  <span className="font-medium text-right max-w-xs truncate">
-                    {dashData.active_booking.location}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Status</span>
-                  <StatusBadge status={dashData.active_booking.status} />
+        {/* Jadwal Aktif – Pendonor (booking + event registrations) */}
+        {!isAdminOrPetugas && (() => {
+          const hasBooking = !!dashData?.active_booking;
+          const eventRegs: any[] = dashData?.active_event_registrations || [];
+          const hasEventRegs = eventRegs.length > 0;
+          const hasAny = hasBooking || hasEventRegs;
+
+          if (!hasAny) return (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center justify-center">
+              <div className="text-center">
+                <Calendar className="text-gray-300 mx-auto mb-2" size={32} />
+                <p className="text-sm text-gray-400">Belum ada jadwal donor aktif</p>
+                <div className="flex gap-2 justify-center mt-3">
+                  <button
+                    onClick={() => navigate('/booking')}
+                    className="text-xs text-red-600 font-medium hover:underline"
+                  >
+                    Buat Booking →
+                  </button>
+                  <span className="text-gray-300 text-xs">|</span>
+                  <button
+                    onClick={() => navigate('/events')}
+                    className="text-xs text-blue-600 font-medium hover:underline"
+                  >
+                    Lihat Event →
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        ) : isAdminOrPetugas && dashData?.recent_donors ? (
+          );
+
+          return (
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900">Jadwal Donor Aktif</h3>
+                <button
+                  onClick={() => navigate('/booking')}
+                  className="text-xs text-red-600 font-medium hover:text-red-700 flex items-center gap-1"
+                >
+                  Lihat semua <ChevronRight size={12} />
+                </button>
+              </div>
+              <div className="space-y-3">
+
+                {/* Booking reguler */}
+                {hasBooking && (
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="text-blue-600" size={16} />
+                      <span className="text-xs font-semibold text-blue-800 uppercase tracking-wide">Booking Donor</span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Tanggal</span>
+                        <span className="font-medium text-black">{dashData!.active_booking!.date}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Lokasi</span>
+                        <span className="font-medium text-right max-w-[160px] truncate text-black">{dashData!.active_booking!.location}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Status</span>
+                        <StatusBadge status={dashData!.active_booking!.status} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Event yang sudah didaftarkan */}
+                {hasEventRegs && eventRegs.map((reg: any) => (
+                  <button
+                    key={reg.id}
+                    onClick={() => navigate(`/events/${reg.event_id}`)}
+                    className="w-full text-left bg-purple-50 rounded-xl p-4 border border-purple-100 hover:bg-purple-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <MapPin className="text-purple-600" size={16} />
+                      <span className="text-xs font-semibold text-purple-800 uppercase tracking-wide">Event Donor</span>
+                      <span className="ml-auto text-purple-400">
+                        <ChevronRight size={14} />
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 text-sm">
+                      <div className="font-semibold text-gray-800 text-sm line-clamp-1">{reg.name}</div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Tanggal</span>
+                        <span className="font-medium text-black">{reg.date}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Lokasi</span>
+                        <span className="font-medium text-right max-w-[160px] truncate text-black">{reg.location}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Status</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                          Terdaftar
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+
+              </div>
+            </div>
+          );
+        })()}
+        {/* Donor Terbaru – hanya untuk admin/petugas */}
+        {isAdminOrPetugas && dashData?.recent_donors && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-900">Donor Terbaru</h3>
@@ -417,19 +493,6 @@ export const DashboardPage = () => {
                   <BloodTypeBadge type={d.blood_type || "?"} size="sm" />
                 </div>
               ))}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center justify-center">
-            <div className="text-center">
-              <Calendar className="text-gray-300 mx-auto mb-2" size={32} />
-              <p className="text-sm text-gray-400">Belum ada booking aktif</p>
-              <button
-                onClick={() => navigate("/booking")}
-                className="mt-3 text-xs text-red-600 font-medium"
-              >
-                Buat Jadwal Donor →
-              </button>
             </div>
           </div>
         )}
