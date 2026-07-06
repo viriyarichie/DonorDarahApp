@@ -97,7 +97,7 @@ export const RegisterPage = () => {
               />
             </div>
             {errors.nik && (
-              <p className="text-xs text-red-600 mt-1">{errors.nik[0]}</p>
+              <p className="text-xs text-white-600 mt-1">{errors.nik[0]}</p>
             )}
           </div>
 
@@ -120,7 +120,7 @@ export const RegisterPage = () => {
               />
             </div>
             {errors.name && (
-              <p className="text-xs text-red-600 mt-1">{errors.name[0]}</p>
+              <p className="text-xs text-white-600 mt-1">{errors.name[0]}</p>
             )}
           </div>
 
@@ -143,7 +143,7 @@ export const RegisterPage = () => {
               />
             </div>
             {errors.email && (
-              <p className="text-xs text-red-600 mt-1">{errors.email[0]}</p>
+              <p className="text-xs text-white-600 mt-1">{errors.email[0]}</p>
             )}
           </div>
 
@@ -194,7 +194,7 @@ export const RegisterPage = () => {
                 onChange={(e) =>
                   setForm({ ...form, blood_type: e.target.value })
                 }
-                className="w-full px-3 py-2.5 rounded-xl border text-sm border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none"
+                className="w-full px-3 py-2.5 rounded-xl border text-sm border-gray-200 focus:border-white-400 focus:ring-2 focus:ring-red-100 outline-none"
               >
                 <option value="">Pilih</option>
                 {["A", "B", "AB", "O"].map((t) => (
@@ -232,7 +232,9 @@ export const RegisterPage = () => {
               </button>
             </div>
             {errors.password && (
-              <p className="text-xs text-red-600 mt-1">{errors.password[0]}</p>
+              <p className="text-xs text-white-600 mt-1">
+                {errors.password[0]}
+              </p>
             )}
           </div>
 

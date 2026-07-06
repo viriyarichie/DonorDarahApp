@@ -64,13 +64,13 @@ export const LoginPage = () => {
               className={`w-full pl-11 pr-4 py-3 rounded-xl border text-sm transition-colors outline-none text-white ${
                 errors.email
                   ? "border-red-400 bg-red-50"
-                  : "border-gray-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                  : "border-red-200 focus:border-red-400 focus:ring-2 focus:ring-red-100"
               }`}
               required
             />
           </div>
           {errors.email && (
-            <p className="text-xs text-red-600 mt-1">{errors.email[0]}</p>
+            <p className="text-xs text-white-600 mt-1">{errors.email[0]}</p>
           )}
         </div>
 
@@ -105,7 +105,7 @@ export const LoginPage = () => {
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-red-600 mt-1">{errors.password[0]}</p>
+            <p className="text-xs text-white-600 mt-1">{errors.password[0]}</p>
           )}
         </div>
 
@@ -113,7 +113,7 @@ export const LoginPage = () => {
           <label className="flex items-center gap-2 text-sm text-white-600 cursor-pointer">
             <input
               type="checkbox"
-              className="w-4 h-4 rounded border-white-300 text-red-600"
+              className="w-4 h-4 rounded border-white-300 text-white-600"
             />
             Ingat saya
           </label>

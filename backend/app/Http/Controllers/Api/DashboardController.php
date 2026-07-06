@@ -8,6 +8,7 @@ use App\Models\Donor;
 use App\Models\Event;
 use App\Models\Stock;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -16,12 +17,20 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function __construct(private StockService $stockService) {}
+    public function __construct(
+        private StockService $stockService,
+        private NotificationService $notificationService,
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
         $period = $request->query('period', '1m');
-        $user = $request->user();
+        $user   = $request->user();
+
+        // Kirim notifikasi pengingat secara otomatis saat pendonor buka dashboard
+        if ($user->isPendonor()) {
+            $this->notificationService->checkAndSendReminders($user);
+        }
 
         if ($user->isAdmin() || $user->isPetugas()) {
             return $this->adminDashboard($period);
