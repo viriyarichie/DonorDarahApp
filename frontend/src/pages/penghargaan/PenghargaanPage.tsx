@@ -53,20 +53,57 @@ const PendonorPenghargaan = () => {
   const totalDonor = stats?.total_donor || 0;
   const certs = certData?.data?.data || [];
 
-  const handleDownload = async (certId: number, milestone: number) => {
-    try {
-      const res = await api.get(`/certificates/${certId}/download`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Sertifikat_Donor_${milestone}x.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      toast.error('Gagal mengunduh sertifikat. Coba lagi.');
+  const handleDownload = (cert: any, milestone: number) => {
+    const filename = `Sertifikat_Donor_PMI_${milestone}x.pdf`;
+
+    if (cert.file_url) {
+      // Fetch sebagai blob agar browser trigger download, bukan buka di tab baru
+      fetch(cert.file_url)
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.blob();
+        })
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(() => {
+          // Fallback: gunakan API endpoint dengan auth header
+          api.get(`/certificates/${cert.id}/download`, { responseType: 'blob' })
+            .then((res) => {
+              const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = filename;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              window.URL.revokeObjectURL(url);
+            })
+            .catch(() => toast.error('Gagal mengunduh sertifikat. Coba lagi.'));
+        });
+      return;
     }
+
+    // Tidak ada file_url sama sekali — coba via API
+    api.get(`/certificates/${cert.id}/download`, { responseType: 'blob' })
+      .then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(() => toast.error('Gagal mengunduh sertifikat. Coba lagi.'));
   };
 
   const getCertStatus = (milestone: number) => certs.find(c => c.milestone === milestone);
@@ -146,12 +183,18 @@ const PendonorPenghargaan = () => {
 
               {cert?.status === 'disetujui' && cert.can_download && (
                 <button
-                  onClick={() => handleDownload(cert.id, milestone)}
+                  onClick={() => handleDownload(cert, milestone)}
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition-colors"
                 >
                   <Download size={14} />
                   Unduh Sertifikat
                 </button>
+              )}
+              {cert?.status === 'disetujui' && !cert.can_download && (
+                <div className="flex items-center gap-2 text-amber-600 text-sm">
+                  <Clock size={14} />
+                  Sertifikat sedang disiapkan...
+                </div>
               )}
               {cert?.status === 'pending' && (
                 <div className="flex items-center gap-2 text-amber-600 text-sm">

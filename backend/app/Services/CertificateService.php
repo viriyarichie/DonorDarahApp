@@ -74,15 +74,32 @@ class CertificateService
 
     private function generatePdf(Certificate $certificate): string
     {
+        // Pastikan relasi user ter-load
+        if (!$certificate->relationLoaded('user')) {
+            $certificate->load('user');
+        }
+
         $user = $certificate->user;
+
         $pdf = Pdf::loadView('pdf.certificate', [
             'certificate' => $certificate,
-            'user' => $user,
+            'user'        => $user,
             'donor_count' => $user->getDonorCount(),
+        ])
+        ->setPaper('a4', 'landscape')
+        ->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled'      => false,
+            'defaultFont'          => 'serif',
+            'dpi'                  => 150,
         ]);
 
-        $fileName = 'certificates/sertifikat_' . $user->id . '_' . $certificate->milestone . '_' . time() . '.pdf';
-        Storage::disk('public')->put($fileName, $pdf->output());
+        // Pastikan direktori ada
+        $dir = 'certificates';
+        \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($dir);
+
+        $fileName = $dir . '/sertifikat_' . $user->id . '_' . $certificate->milestone . '_' . time() . '.pdf';
+        \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $pdf->output());
 
         return $fileName;
     }

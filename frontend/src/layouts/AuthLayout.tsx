@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, Navigate, useParams } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { Droplets } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,19 +21,20 @@ export const AuthLayout = () => {
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
+  // State lokal untuk artikel yang dipilih (tidak pakai URL param agar tidak conflict dengan protected route)
+  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { id: artikelId } = useParams();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["articles", search, page],
+    queryKey: ["articles-public", search, page],
     queryFn: () => articleService.getAll({ search, page }),
-    enabled: !artikelId,
+    enabled: !selectedArticleId,
   });
 
   const { data: detailData, isLoading: isDetailLoading } = useQuery({
-    queryKey: ["article", artikelId],
-    queryFn: () => articleService.getById(Number(artikelId)),
-    enabled: !!artikelId,
+    queryKey: ["article-public", selectedArticleId],
+    queryFn: () => articleService.getById(Number(selectedArticleId)),
+    enabled: !!selectedArticleId,
   });
 
   const articles = data?.data?.data || [];
@@ -50,14 +51,14 @@ export const AuthLayout = () => {
 
   const renderLeftPanel = () => {
     // ── Detail artikel ──────────────────────────────────────────
-    if (artikelId) {
+    if (selectedArticleId) {
       if (!article) {
         return (
           <div className="text-center py-16">
             <BookOpen className="text-gray-300 mx-auto mb-3" size={48} />
             <p className="text-gray-500">Artikel tidak ditemukan.</p>
             <button
-              onClick={() => navigate("/edukasi")}
+              onClick={() => setSelectedArticleId(null)}
               className="mt-4 text-red-600 text-sm font-medium hover:text-red-700"
             >
               ← Kembali ke Edukasi
@@ -69,7 +70,7 @@ export const AuthLayout = () => {
       return (
         <div className="max-w-3xl mx-auto space-y-6 p-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => setSelectedArticleId(null)}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft size={16} />
@@ -178,7 +179,7 @@ export const AuthLayout = () => {
             {articles.map((article) => (
               <button
                 key={article.id}
-                onClick={() => navigate(`/edukasi/${article.id}`)}
+                onClick={() => setSelectedArticleId(article.id)}
                 className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-left card-hover transition-all"
               >
                 <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center mb-3">
@@ -219,7 +220,7 @@ export const AuthLayout = () => {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left - hidden on mobile when viewing article detail */}
       <div
-        className={`${artikelId ? "hidden md:block" : "block"} w-full md:w-1/2 overflow-y-auto bg-gray-50`}
+        className={`${selectedArticleId ? "hidden md:block" : "block"} w-full md:w-1/2 overflow-y-auto bg-gray-50`}
       >
         {renderLeftPanel()}
       </div>

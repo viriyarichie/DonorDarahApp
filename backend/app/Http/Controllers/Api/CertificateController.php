@@ -8,8 +8,8 @@ use App\Models\Certificate;
 use App\Services\CertificateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CertificateController extends Controller
 {
@@ -71,15 +71,21 @@ class CertificateController extends Controller
         ]);
     }
 
-    public function download(Certificate $certificate): Response
+    public function download(Request $request, Certificate $certificate): BinaryFileResponse
     {
+        // Pastikan hanya pemilik sertifikat yang bisa download
+        if ($request->user()->isPendonor() && $certificate->user_id !== $request->user()->id) {
+            abort(403, 'Anda tidak memiliki akses ke sertifikat ini.');
+        }
+
         if (!$certificate->file_path || !Storage::disk('public')->exists($certificate->file_path)) {
-            abort(404, 'File sertifikat tidak ditemukan.');
+            abort(404, 'File sertifikat tidak ditemukan. Hubungi petugas PMI.');
         }
 
         return response()->download(
             Storage::disk('public')->path($certificate->file_path),
-            'Sertifikat_PMI_' . $certificate->milestone . 'x.pdf'
+            'Sertifikat_Donor_PMI_' . $certificate->milestone . 'x_' . $certificate->user_id . '.pdf',
+            ['Content-Type' => 'application/pdf']
         );
     }
 }
